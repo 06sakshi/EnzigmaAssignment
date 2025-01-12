@@ -1,0 +1,90 @@
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+
+public class LoginPageValidation {
+    public static void main(String[] args) {
+        // Set up WebDriver and launch the browser
+        System.setProperty("webdriver.chrome.driver", "path/to/chromedriver");
+        WebDriver driver = new ChromeDriver();
+
+        try {
+            // Navigate to the login page
+            driver.get("https://app-staging.nokodr.com/).
+");
+
+            // Maximize the browser window
+            driver.manage().window().maximize();
+
+            // Test cases for the login page
+
+            // Case 1: Valid credentials
+            validateLogin(driver, "sakshimane", "sakshi123");
+
+            // Case 2: Incorrect username
+            validateLogin(driver, "manesakshi", "sakshi123");
+
+            // Case 3: Incorrect password
+            validateLogin(driver, "sakshimane", "sakshi1234");
+
+            // Case 4: Blank fields
+            validateLogin(driver, "", "");
+
+            // Case 5: Special characters in username/password
+            validateLogin(driver, "@sakshimane", "sa#kshi*12%34!");
+
+        } finally {
+            // Close the browser
+            driver.quit();
+        }
+    }
+
+    public static void validateLogin(WebDriver driver, String username, String password) {
+        // Locate the input fields and buttons
+        WebElement usernameField = driver.findElement(By.id("username"));
+        WebElement passwordField = driver.findElement(By.id("password"));
+        WebElement loginButton = driver.findElement(By.id("loginButton"));
+
+        // Clear previous input values
+        usernameField.clear();
+        passwordField.clear();
+
+        // Enter data into input fields
+        usernameField.sendKeys(username);
+        passwordField.sendKeys(password);
+
+        // Submit the form
+        loginButton.click();
+
+        // Wait for a response
+        try {
+            Thread.sleep(2000); // Wait for response (can be replaced with WebDriverWait)
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        // Check for success or error messages
+        if (!username.isEmpty() && !password.isEmpty() && username.equals("sakshimane") && password.equals("sakshi1234")) {
+            // Success message or redirection to the dashboard
+            if (driver.getCurrentUrl().contains("dashboard")) {
+                System.out.println("Test Passed: Successfully redirected to dashboard.");
+            } else {
+                WebElement successMessage = driver.findElement(By.id("successMessage"));
+                if (successMessage.isDisplayed()) {
+                    System.out.println("Test Passed: " + successMessage.getText());
+                } else {
+                    System.out.println("Test Failed: Success message not displayed.");
+                }
+            }
+        } else {
+            // Error message for invalid credentials
+            WebElement errorMessage = driver.findElement(By.id("errorMessage"));
+            if (errorMessage.isDisplayed()) {
+                System.out.println("Test Passed: " + errorMessage.getText());
+            } else {
+                System.out.println("Test Failed: Error message not displayed.");
+            }
+        }
+    }
+}

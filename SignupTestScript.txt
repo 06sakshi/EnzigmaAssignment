@@ -1,0 +1,93 @@
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+
+public class SignupPageValidation {
+    public static void main(String[] args) {
+        // Set up WebDriver and launch the browser
+        System.setProperty("webdriver.chrome.driver", "path/to/chromedriver");
+        WebDriver driver = new ChromeDriver();
+
+        try {
+            // Navigate to the signup page
+            driver.get("https://app-staging.nokodr.com/");
+
+            // Maximize the browser window
+            driver.manage().window().maximize();
+
+            // Test cases for the signup page
+
+            // Case 1: Valid Inputs
+            validateSignup(driver, "Sakshi Mane", "sakshianilmane143@gmail.com", "sakshimane123", "sakshimane123");
+
+            // Case 2: Invalid email format
+            validateSignup(driver, "sakshi mane2", "invalid-email", "sakshi1234", "sakshi1234");
+
+            // Case 3: Passwords do not match
+            validateSignup(driver, "sakshi mane2", "invalid-email", "sakshi1234", "sakshi1234");
+
+            // Case 4: Blank mandatory fields
+            validateSignup(driver, "", "", "", "");
+
+            // Case 5: Special characters in name
+            validateSignup(driver, "@Sakshi$", "sakshimane@.com", "sakshi1234", "sakshi1234");
+
+            // Case 6: Excessively long inputs
+            validateSignup(driver, "SakshiManeWithAnExcessivelyLongNameThatShouldFailValidation",
+                    "verylongemail@.com", "sakshi1234", "sakshi1234");
+
+        } finally {
+            // Close the browser
+            driver.quit();
+        }
+    }
+
+    public static void validateSignup(WebDriver driver, String name, String email, String password, String confirmPassword) {
+        // Locate the input fields and buttons
+        WebElement nameField = driver.findElement(By.id("name"));
+        WebElement emailField = driver.findElement(By.id("email"));
+        WebElement passwordField = driver.findElement(By.id("password"));
+        WebElement confirmPasswordField = driver.findElement(By.id("confirmPassword"));
+        WebElement signupButton = driver.findElement(By.id("signupButton"));
+
+        // Clear previous input values
+        nameField.clear();
+        emailField.clear();
+        passwordField.clear();
+        confirmPasswordField.clear();
+
+        // Enter data into input fields
+        nameField.sendKeys(name);
+        emailField.sendKeys(email);
+        passwordField.sendKeys(password);
+        confirmPasswordField.sendKeys(confirmPassword);
+
+        // Submit the form
+        signupButton.click();
+
+        // Wait for a response and validate success/error messages
+        try {
+            Thread.sleep(2000); // Wait for response (can be replaced with WebDriverWait)
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        // Check for success or error messages
+        if (!name.isEmpty() && !email.isEmpty() && email.contains("@") && password.equals(confirmPassword)) {
+            WebElement successMessage = driver.findElement(By.id("successMessage"));
+            if (successMessage.isDisplayed()) {
+                System.out.println("Test Passed: " + successMessage.getText());
+            } else {
+                System.out.println("Test Failed: Success message not displayed.");
+            }
+        } else {
+            WebElement errorMessage = driver.findElement(By.id("errorMessage"));
+            if (errorMessage.isDisplayed()) {
+                System.out.println("Test Passed: " + errorMessage.getText());
+            } else {
+                System.out.println("Test Failed: Error message not displayed.");
+            }
+        }
+    }
+}
